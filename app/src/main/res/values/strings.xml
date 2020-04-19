@@ -1,0 +1,12 @@
+<resources>
+    <string name="app_name">PersePass</string>
+    <string name="navigation_drawer_open">Open navigation drawer</string>
+    <string name="navigation_drawer_close">Close navigation drawer</string>
+    <string name="nav_header_title">PersePass</string>
+    <string name="nav_header_subtitle">psandeep01@gmail.com</string>
+    <string name="nav_header_desc">Perse Pass</string>
+    <string name="action_settings">Settings</string>
+
+    <string name="menu_home">Home</string>
+    <string name="menu_share">Share</string>
+</resources>
