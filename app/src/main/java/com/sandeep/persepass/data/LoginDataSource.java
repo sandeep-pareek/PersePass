@@ -13,11 +13,14 @@ public class LoginDataSource {
 
         try {
             // TODO: handle loggedInUser authentication
-            LoggedInUser fakeUser =
-                    new LoggedInUser(
-                            java.util.UUID.randomUUID().toString(),
-                            "Jane Doe");
-            return new Result.Success<>(fakeUser);
+            if (username.equals("psandeep01@gmail.com") && password.equals("test123")) {
+                LoggedInUser user =
+                        new LoggedInUser(
+                                java.util.UUID.randomUUID().toString(),
+                                "Sandeep Pareek");
+                return new Result.Success<>(user);
+            }
+            return new Result.Error(new Exception("Invalid user or password!"));
         } catch (Exception e) {
             return new Result.Error(new IOException("Error logging in", e));
         }
