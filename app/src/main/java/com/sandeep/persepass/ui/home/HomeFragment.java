@@ -10,84 +10,133 @@ import android.widget.Button;
 import android.widget.ListView;
 import android.widget.TextView;
 
-import androidx.annotation.Nullable;
-import androidx.annotation.NonNull;
-import androidx.fragment.app.Fragment;
-import androidx.lifecycle.Observer;
-import androidx.lifecycle.ViewModelProvider;
-import androidx.lifecycle.ViewModelProviders;
-
+import com.google.android.material.snackbar.Snackbar;
 import com.sandeep.persepass.R;
+import com.sandeep.persepass.data.model.PersePass;
 
+import java.io.BufferedReader;
+import java.io.File;
+import java.io.FileOutputStream;
+import java.io.FileReader;
+import java.io.OutputStreamWriter;
 import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
-public class HomeFragment extends Fragment{
+import androidx.annotation.NonNull;
+import androidx.fragment.app.Fragment;
+import androidx.lifecycle.ViewModelProvider;
+
+/**
+ * @author sandeep
+ */
+public class HomeFragment extends Fragment {
 
     private HomeViewModel homeViewModel;
-//    private MyCustomAdapter adapter;
     private ArrayAdapter adapter;
     private Button savePassButton;
     private TextView key;
     private TextView pass;
+    static final String FILE_NAME = "persePassFile.txt";
+    static final String CHILD_FOLDER = "MyPass";
 
-    ArrayList<HashMap<String,String>> animalList = new ArrayList();
-
-//    animalList.
+    ArrayList<HashMap<String, String>> passList = new ArrayList();
 
     public View onCreateView(@NonNull LayoutInflater inflater,
                              ViewGroup container, Bundle savedInstanceState) {
         homeViewModel = new
                 ViewModelProvider(this).get(HomeViewModel.class);
         View root = inflater.inflate(R.layout.fragment_home, container, false);
-//        final TextView textView = root.findViewById(R.id.text_home);
 
-        ListView simpleList = (ListView) root.findViewById(R.id.listView1);
+        ListView simpleList = root.findViewById(R.id.listView1);
         savePassButton = root.findViewById(R.id.button3);
-//        ArrayAdapter<String> arrayAdapter = new ArrayAdapter<String>(this, R.layout.fragment_home, R.id.textView, animalList);
-//        simpleList.setAdapter(arrayAdapter);
 
-        HashMap m = new HashMap();
-        m.put("fb", "fb_pass");
-        animalList.add(m);
-        adapter = new ArrayAdapter<>(getActivity().getApplicationContext(), android.R.layout.simple_list_item_1 , animalList);
-//        adapter = new MyCustomAdapter(this.getActivity(), animalList);
+        List<PersePass> persePassObject = readFromFile();
+        if (persePassObject != null) {
+            persePassObject.forEach(pp -> {
+                HashMap<String, String> map = new HashMap<>(0);
+                map.put(pp.getKey(), pp.getPass());
+                passList.add(map);
+            });
+        }
+        adapter = new ArrayAdapter<>(getActivity().getApplicationContext(), android.R.layout.simple_list_item_1, passList);
         key = root.findViewById(R.id.editText1);
         pass = root.findViewById(R.id.editText2);
 
         simpleList.setAdapter(adapter);
         Log.i("HomeFragment", "Adapter set");
-        savePassButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                switch (v.getId()) {
-                    case R.id.button3:
-                        if (!key.getText().toString().trim().isEmpty() && !pass.getText().toString().trim().isEmpty()) {
-                            HashMap m = new HashMap();
-                            m.put(key.getText().toString().trim(), pass.getText().toString().trim());
-                            animalList.add(m);
-                            Log.i("Added to PassList", key.getText().toString());
-                            adapter.notifyDataSetChanged();
-                            key.setText("");
-                            pass.setText("");
-                        }
-                        break;
-                    default:
-                        break;
-                }
+        savePassButton.setOnClickListener(v -> {
+            switch (v.getId()) {
+                case R.id.button3:
+                    if (!key.getText().toString().trim().isEmpty() && !pass.getText().toString().trim().isEmpty()) {
+                        HashMap m = new HashMap();
+                        m.put(key.getText().toString().trim(), pass.getText().toString().trim());
+                        passList.add(m);
+                        Log.i("Added to PassList", key.getText().toString());
+                        adapter.notifyDataSetChanged();
+                        writeToFile();
+                        key.setText("");
+                        pass.setText("");
+                        Snackbar.make(v, "Pass added", Snackbar.LENGTH_LONG)
+                                .setAction("Action", null).show();
+                    }
+                    break;
+                default:
+                    break;
             }
         });
-
-
-        homeViewModel.getText().observe(getViewLifecycleOwner(), new Observer<String>() {
-            @Override
-            public void onChanged(@Nullable String s) {
-            }
+        homeViewModel.getText().observe(getViewLifecycleOwner(), s -> {
         });
         return root;
     }
+
+    // write text to file
+    public void writeToFile() {
+        File file = new File(getContext().getExternalFilesDir(null), CHILD_FOLDER);
+        if (!file.exists()) {
+            file.mkdir();
+        }
+
+        try {
+            File oFile = new File(file, FILE_NAME);
+            FileOutputStream output = new FileOutputStream(oFile, true);
+            OutputStreamWriter writer = new OutputStreamWriter(output);
+            String saveValue = key.getText().toString() + "|" + pass.getText().toString();
+            writer.append(saveValue);
+            writer.append("\n");
+            writer.flush();
+            writer.close();
+
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
     }
+
+    // Read text from file
+    public List<PersePass> readFromFile() {
+        File file = new File(getContext().getExternalFilesDir(null), CHILD_FOLDER);
+        if (!file.exists()) {
+            Log.i("FILE_NOT_FOUD", "file not found " + getContext().getExternalFilesDir(null) + CHILD_FOLDER + "/" + FILE_NAME);
+            return null;
+        }
+        try {
+            File oFile = new File(file, FILE_NAME);
+
+            FileReader reader = new FileReader(oFile);
+            BufferedReader in = new BufferedReader(reader);
+            String text = "";
+            List<PersePass> persePasses = new ArrayList<>(0);
+            while ((text = in.readLine()) != null) {
+                String values[] = text.split("[|]");
+                PersePass pp = new PersePass(values[0], values[1]);
+                persePasses.add(pp);
+            }
+            return persePasses;
+
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return null;
+    }
+}
+
