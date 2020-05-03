@@ -13,6 +13,8 @@ import android.widget.TextView;
 import com.google.android.material.snackbar.Snackbar;
 import com.sandeep.persepass.R;
 import com.sandeep.persepass.data.model.PersePass;
+import com.sandeep.persepass.ui.login.LoginViewModel;
+import com.sandeep.persepass.ui.login.LoginViewModelFactory;
 
 import java.io.BufferedReader;
 import java.io.File;
@@ -33,6 +35,7 @@ import androidx.lifecycle.ViewModelProvider;
 public class HomeFragment extends Fragment {
 
     private HomeViewModel homeViewModel;
+    private LoginViewModel loginViewModel;
     private ArrayAdapter adapter;
     private Button savePassButton;
     private TextView key;
@@ -47,6 +50,8 @@ public class HomeFragment extends Fragment {
         homeViewModel = new
                 ViewModelProvider(this).get(HomeViewModel.class);
         View root = inflater.inflate(R.layout.fragment_home, container, false);
+        loginViewModel = new ViewModelProvider(this, new LoginViewModelFactory())
+                .get(LoginViewModel.class);
 
         ListView simpleList = root.findViewById(R.id.listView1);
         savePassButton = root.findViewById(R.id.button3);
