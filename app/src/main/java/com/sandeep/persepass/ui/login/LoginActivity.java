@@ -151,7 +151,9 @@ public class LoginActivity extends AppCompatActivity {
                         // a listener.
                         Task<GoogleSignInAccount> task = GoogleSignIn.getSignedInAccountFromIntent(data);
                         GoogleSignInAccount account = task.getResult(ApiException.class);
-                        System.out.println("test");
+//                        System.out.println("test" + account.getId());
+                        loginViewModel.login(account.getEmail(),
+                                account.getId());
 //                        onLoggedIn(account);
                     } catch (ApiException e) {
                         Log.w("GoogleSignIn", "signInResult:failed code=" + e.getStatusCode());
