@@ -15,6 +15,7 @@ import com.sandeep.persepass.R;
 import com.sandeep.persepass.data.LoginDataSource;
 import com.sandeep.persepass.data.LoginRepository;
 import com.sandeep.persepass.data.model.PersePass;
+import com.sandeep.persepass.security.Secure;
 
 import java.io.BufferedReader;
 import java.io.File;
@@ -54,6 +55,12 @@ public class HomeFragment extends Fragment {
 
         CHILD_FOLDER = loginRepository.getLoggedInUser().getDisplayName();
 
+        // encrypt and decrypt
+//        String enc = Secure.encrypt("VRAsdre!", loginRepository.getLoggedInUser().getUserId());
+//        System.out.println("ENC" + enc);
+//        String dec = Secure.decrypt(enc, loginRepository.getLoggedInUser().getUserId());
+//        System.out.println("DEC: "+dec);
+
         ListView simpleList = root.findViewById(R.id.listView1);
         savePassButton = root.findViewById(R.id.button3);
 
@@ -61,7 +68,8 @@ public class HomeFragment extends Fragment {
         if (persePassObject != null) {
             persePassObject.forEach(pp -> {
                 HashMap<String, String> map = new HashMap<>(0);
-                map.put(pp.getKey(), pp.getPass());
+                map.put(Secure.decrypt(pp.getKey(), loginRepository.getLoggedInUser().getUserId()),
+                        Secure.decrypt(pp.getPass(), loginRepository.getLoggedInUser().getUserId()));
                 passList.add(map);
             });
         }
@@ -81,8 +89,8 @@ public class HomeFragment extends Fragment {
                         Log.i("Added to PassList", key.getText().toString());
                         adapter.notifyDataSetChanged();
                         writeToFile();
-                        key.setText("");
                         pass.setText("");
+                        key.setText("");
                         Snackbar.make(v, "Pass added", Snackbar.LENGTH_LONG)
                                 .setAction("Action", null).show();
                     }
@@ -107,7 +115,8 @@ public class HomeFragment extends Fragment {
             File oFile = new File(file, FILE_NAME);
             FileOutputStream output = new FileOutputStream(oFile, true);
             OutputStreamWriter writer = new OutputStreamWriter(output);
-            String saveValue = key.getText().toString() + "|" + pass.getText().toString();
+            String saveValue = Secure.encrypt(key.getText().toString(), loginRepository.getLoggedInUser().getUserId()) +
+                    "|" + Secure.encrypt(pass.getText().toString(), loginRepository.getLoggedInUser().getUserId());
             writer.append(saveValue);
             writer.append("\n");
             writer.flush();

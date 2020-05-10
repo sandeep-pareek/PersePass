@@ -66,12 +66,13 @@ public class MainActivity extends AppCompatActivity {
 
     private void signOut() {
         mGoogleSignInClient.signOut().addOnCompleteListener(this, task -> System.out.println(""));
+        finish();
     }
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         // Inflate the menu; this adds items to the action bar if it is present.
-        getMenuInflater().inflate(R.menu.main, menu);
+        getMenuInflater().inflate(R.menu.main_xml, menu);
         return true;
     }
 

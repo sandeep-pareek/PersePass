@@ -118,6 +118,7 @@ public class LoginActivity extends AppCompatActivity {
                     passwordEditText.getText().toString());
 //                        Snackbar.make(v, "your own action", Snackbar.LENGTH_LONG)
 //                .setAction("Action", null).show();
+            finish();
         });
     }
 
@@ -155,6 +156,7 @@ public class LoginActivity extends AppCompatActivity {
                         loginViewModel.login(account.getEmail(),
                                 account.getId());
 //                        onLoggedIn(account);
+//                        finish();
                     } catch (ApiException e) {
                         Log.w("GoogleSignIn", "signInResult:failed code=" + e.getStatusCode());
                     }
